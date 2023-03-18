@@ -1,68 +1,74 @@
 package main
 
 import (
-    "bufio"
-    "context"
-    "fmt"
-    "os"
-    "strings"
-    openai "github.com/sashabaranov/go-openai"
-    "github.com/fatih/color"
+	"bufio"
+	"context"
+	//"fmt"
+	"os"
+	"strings"
+
+	openai "github.com/sashabaranov/go-openai"
+	"github.com/fatih/color"
 )
 
 var (
-    promptStyle       = color.New(color.FgHiMagenta, color.Bold)
-    userInputStyle    = color.New(color.FgHiCyan)
-    goGPTResponseStyle = color.New(color.FgHiGreen)
-    errorStyle        = color.New(color.FgHiRed, color.Bold)
+	promptStyle       = color.New(color.FgHiMagenta, color.Bold)
+	userInputStyle    = color.New(color.FgHiCyan)
+	goGPTResponseStyle = color.New(color.FgHiGreen)
+	errorStyle        = color.New(color.FgHiRed, color.Bold)
 )
 
-func PrintStyled(c *color.Color, format string, a ...interface{}) {
-    c.PrintfFunc()(format, a...)
+func printStyled(c *color.Color, format string, a ...interface{}) {
+	c.PrintfFunc()(format, a...)
 }
 
 func main() {
-    client := openai.NewClient("YOUR TOKEN")
+	client := openai.NewClient("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")
+	reader := bufio.NewReader(os.Stdin)
 
-    reader := bufio.NewReader(os.Stdin)
+	printStyled(promptStyle, "Welcome to GoGPT! Please choose a role: writer, programmer, or teacher\n")
+	role, _ := reader.ReadString('\n')
+	role = strings.TrimSpace(strings.ToLower(role))
 
-    PrintStyled(promptStyle, "Welcome to GoGPT! Please choose a role: writer, programmer, or teacher\n")
-    role, _ := reader.ReadString('\n')
-    role = strings.TrimSpace(strings.ToLower(role))
+	// Initialize an empty slice to store the conversation history in memory
+	var messages []openai.ChatCompletionMessage
 
-    for {
-        PrintStyled(promptStyle, "Enter your message (type 'exit' to quit):\n")
-        userInput, _ := reader.ReadString('\n')
-        userInput = strings.TrimSpace(userInput)
+	for {
+		printStyled(promptStyle, "Enter your message (type 'exit' to quit):\n")
+		userInput, _ := reader.ReadString('\n')
+		userInput = strings.TrimSpace(userInput)
 
-        if userInput == "exit" {
-            break
-        }
+		if userInput == "exit" {
+			break
+		}
 
-        resp, err := client.CreateChatCompletion(
-            context.Background(),
-            openai.ChatCompletionRequest{
-                Model: openai.GPT3Dot5Turbo,
-                Messages: []openai.ChatCompletionMessage{
-                    {
-                        Role:    openai.ChatMessageRoleSystem,
-                        Content: fmt.Sprintf("You are a %s now. I am here to assist you with any questions you have.", role),
-                    },
-                    {
-                        Role:    openai.ChatMessageRoleUser,
-                        Content: userInput,
-                    },
-                },
-            },
-        )
+		// Add user message to the history
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: userInput,
+		})
 
-        if err != nil {
-            PrintStyled(errorStyle, "ChatCompletion error: %v\n", err)
-            return
-        }
+		resp, err := client.CreateChatCompletion(
+			context.Background(),
+			openai.ChatCompletionRequest{
+				Model:    openai.GPT3Dot5Turbo,
+				Messages: messages,
+			},
+		)
 
-        PrintStyled(userInputStyle, "You: %s\n", userInput)
-        PrintStyled(goGPTResponseStyle, "GoGPT (%s): %s\n", role, resp.Choices[0].Message.Content)
-    }
+		if err != nil {
+			printStyled(errorStyle, "ChatCompletion error: %v\n", err)
+			return
+		}
+
+		printStyled(userInputStyle, "You: %s\n", userInput)
+		printStyled(goGPTResponseStyle, "GoGPT (%s): %s\n", role, resp.Choices[0].Message.Content)
+
+		// Add GPT-3 response to the history
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleAssistant,
+			Content: resp.Choices[0].Message.Content,
+		})
+	}
 }
 
