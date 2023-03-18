@@ -9,7 +9,7 @@ import (
 
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/fatih/color"
-	db "github.com/gyrusdentatus/GoGPT/db"
+	"github.com/gyrusdentatus/GoGPT/db"
 )
 
 var (
