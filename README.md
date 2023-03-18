@@ -5,6 +5,7 @@ A simple CLI implementation with some colored output using OpenAI's GPT-3.5-turb
 **BIG Thanks** to @sashabaranov and @fatih (took me some time to figure out how to make colorized output in Go haha ...)
 ![image](https://user-images.githubusercontent.com/33793809/226075172-999091ba-586d-4bbf-960f-ab808752eb51.png)
 ## Dependencies (only if you want to fuck around but you need Go to build this or run it obviously)
+- OpenAI API key - for lazy people like me, here is a direct link where to find/create on their [website](https://platform.openai.com/account/api-keys) OpenAI
 - Go 1.17+ 
 - github.com/fatih/color
 - github.com/sashabaranov/go-openai
