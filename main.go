@@ -22,7 +22,7 @@ func PrintStyled(c *color.Color, format string, a ...interface{}) {
 }
 
 func main() {
-    client := openai.NewClient("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")
+    client := openai.NewClient("YOUR TOKEN")
 
     reader := bufio.NewReader(os.Stdin)
 
